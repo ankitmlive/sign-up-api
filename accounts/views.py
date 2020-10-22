@@ -1,5 +1,5 @@
 from rest_framework.authtoken.views import ObtainAuthToken
-from accounts.serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer
+from accounts.serializers import UserRegistrationSerializer, UserSerializer
 
 from rest_framework import generics
 from django.contrib.auth.models import update_last_login
@@ -69,43 +69,3 @@ class UserSignUpView(generics.CreateAPIView):
 
         return Response(response_data)
 
-class UserSignInView(ObtainAuthToken):
-    """
-    View responsible for USER Login
-    """
-    authentication_classes = []
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        response_data = {}
-        serializer = UserLoginSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-                user = serializer.validated_data['user']
-                token, created = Token.objects.get_or_create(user=user)
-                user_logged_in.send(sender=user.__class__, request=request, user=user)
-                update_last_login(None, user)
-                response_data['details'] = 'successfully logged in'
-                # response_data['email'] = user.email
-                # response_data['fullname'] = user.fullname
-                # response_data['username'] = user.username
-                # response_data['avatar'] = request.build_absolute_uri(user.avatar.url)
-                #response_data['pk'] = user.pk
-                response_data['token'] = token.key
-        else:
-            response_data = serializer.errors
-
-        return Response(response_data)
-
-class UserSignOutView(APIView):
-    """
-    View responsible for USER Signout
-    later there is a need of serializer implementaion
-    """
-    authentication_classes = [TokenAuthentication,]
-    permission_classes = [IsAuthenticated,]
-
-    def post(self, request):
-        response_data = {}
-        data = Token.objects.filter(user=request.user).delete()
-        response_data['response'] = 'user successfully logged out'
-        return Response(response_data)
