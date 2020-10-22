@@ -2,7 +2,6 @@ from rest_framework import serializers
 from django.db.models import Q
 from django.contrib.auth import authenticate, get_user_model
 from django.conf import settings
-from accounts.utils import decode_uid
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
